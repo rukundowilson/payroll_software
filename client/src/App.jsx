@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { Route,Routes } from 'react-router';
 import axios from 'axios';
 import './index.css';
 import './App.css';
 import Register from './components/Register';
+import NavBar from "./components/navbar"
 
 function App() {
   const [data, setData] = useState(null);
@@ -24,7 +26,22 @@ function App() {
   return (
     <>
       <div>
-        <Register/>
+        <Routes>
+          <Route path="/" element={
+            <>
+            <NavBar/>
+              <h1>this is a landing page</h1>
+            </>
+          } />
+          <Route path="/register" element = {
+            <>
+             <NavBar/>
+              <Register/>
+
+            </>
+          }/>
+        </Routes>
+        {/* <Register/> */}
       </div>
     </>
   );

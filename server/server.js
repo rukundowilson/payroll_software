@@ -25,6 +25,13 @@ app.get('/', (req, res) => {
   res.status(200).json({ message: 'Hello, this is a backend node server!' });
 });
 
+app.post("/payroll/new/user",(req,res)=>{
+  const data = req.body;
+  console.log(data);
+  res.status(200).json({ message: "Company information submitted successfully!" });
+
+})
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
