@@ -5,6 +5,8 @@ import './index.css';
 import './App.css';
 import Register from './components/Register';
 import NavBar from "./components/navbar"
+import CurrentState from "./components/NotifyState"
+
 
 function App() {
   const [data, setData] = useState(null);
@@ -36,6 +38,7 @@ function App() {
           <Route path="/register" element = {
             <>
              <NavBar/>
+             <CurrentState/>
               <Register/>
 
             </>

@@ -27,8 +27,26 @@ app.get('/', (req, res) => {
 
 app.post("/payroll/new/user",(req,res)=>{
   const data = req.body;
-  console.log(data);
-  res.status(200).json({ message: "Company information submitted successfully!" });
+  
+  // company identity
+  const compName = data.aboutCompany.compName;
+  const compEmail = data.aboutCompany.compEmail;
+  const country = data.aboutCompany.country;
+  const currency = data.aboutCompany.currency;
+
+  // data about our company user
+  const userName = data.aboutCompanyAdmin.userName;
+  const role = data.aboutCompanyAdmin.role;
+  const phoneNumber = data.aboutCompanyAdmin.phoneNumber;
+  const userEmail = data.aboutCompanyAdmin.companyUserEmail;
+  const password = data.aboutCompanyAdmin.password;
+  const confirmPassword = data.aboutCompanyAdmin.confirmPassword;
+
+  if (password !== confirmPassword){
+    res.status(400).json({gotPasswordError : "passwords are not matching!"})
+  }
+  // console.log("this is our companys name: ",compName)
+  // res.status(200).json({ message: "Company information submitted successfully!" });
 
 })
 
