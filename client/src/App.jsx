@@ -5,7 +5,10 @@ import './index.css';
 import './App.css';
 import Register from './components/Register';
 import NavBar from "./components/navbar"
-import CurrentState from "./components/NotifyState"
+import CurrentState from "./components/NotifyState";
+import DashboardNavbar from './components/DashboardLayOut';
+import Login from "./components/Login";
+
 
 
 function App() {
@@ -40,11 +43,20 @@ function App() {
              <NavBar/>
              <CurrentState/>
               <Register/>
-
             </>
           }/>
+          <Route path="/company/user/payroll/management-panel" element={
+            <>
+            <DashboardNavbar/>
+            </>
+          } />
+          <Route path='/login' element={
+          <>
+            <NavBar/>
+            <Login/>
+          </>
+        }/>
         </Routes>
-        {/* <Register/> */}
       </div>
     </>
   );

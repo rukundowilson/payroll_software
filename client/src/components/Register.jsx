@@ -1,9 +1,10 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
+import {useNavigate} from "react-router-dom"
 
 function Register() {
 
-    const [step, setStep] = useState(1); // Step tracker
+    const [step, setStep] = useState(1); 
 
     const [companyName, setCompanyName] = useState("");
     const [companyEmail, setCompEmail] = useState("");
@@ -18,7 +19,9 @@ function Register() {
 
     // setting up some validations
     const [userError, setError] = useState("");
-    const [passwordError, setPassWordError] = useState();
+    const [passwordError, setPassWordError] = useState("");
+
+    const navigate = useNavigate()
 
     const handleNext = () => {
         setStep((prevStep) => prevStep + 1);
@@ -58,7 +61,7 @@ function Register() {
         }
     };
 
-    const finalStep = (event)=>{
+    const finalStep = async (event)=>{
         event.preventDefault(); // Prevent the default form submission behavior
         axios
             .post(
@@ -81,14 +84,18 @@ function Register() {
                 },
                 {
                     headers: {
-                        "Content-Type": "application/json", // Ensure the backend expects JSON
+                        "Content-Type": "application/json",
                     },
                 }
             )
             .then((response) => {
-                console.log("Response:", response.data); // Handle the response here
+                console.log("Response:", response.data);
                 if (response.data.gotPasswordError){
-                    setPassWordError(data.passwordError);
+                    setPassWordError(response.data.gotPasswordError)
+                }
+                else if (response.data.message){
+                    setPassWordError(response.data.message)
+                    navigate(response.data.redirectPath)
                 }
             })
             .catch((error) => {
@@ -118,7 +125,7 @@ function Register() {
                                     {/* Step 1 */}
                                     <li className="flex relative text-center text-indigo-600 text-base font-semibold leading-relaxed">
                                         <div className="sm:w-[176px] w-auto sm:whitespace-nowrap text-center z-10">
-                                            <span className="w-10 h-10 bg-green-600 border border-dotted border-green-600 rounded-full flex justify-center items-center mx-auto mb-1 text-base text-white font-bold leading-relaxed lg:w-10 lg:h-10">
+                                            <span className="w-10 h-10 bg-gray-900 border border-dotted border-green-600 rounded-full flex justify-center items-center mx-auto mb-1 text-base text-white font-bold leading-relaxed lg:w-10 lg:h-10">
                                                 1
                                             </span>{" "}
                                             Company Information
@@ -206,7 +213,7 @@ function Register() {
                                 <div className="w-full flex justify-end">
                                     <button
                                         type="submit"
-                                        className="w-full my-4 px-6 py-3 bg-green-600 text-white rounded-xl"
+                                        className="w-full my-4 px-6 py-3 bg-gray-900 text-white rounded-xl"
                                     >
                                         continue
                                     </button>
@@ -229,7 +236,7 @@ function Register() {
                                     {/* Step 1 */}
                                     <li className="flex relative text-center text-indigo-600 text-base font-semibold leading-relaxed">
                                         <div className="sm:w-[176px] w-auto sm:whitespace-nowrap text-center z-10">
-                                            <span className="w-10 h-10 bg-green-600 border border-dotted border-green-600 rounded-full flex justify-center items-center mx-auto mb-1 text-base text-white font-bold leading-relaxed lg:w-10 lg:h-10">
+                                            <span className="w-10 h-10 bg-gray-900 border border-dotted border-green-600 rounded-full flex justify-center items-center mx-auto mb-1 text-base text-white font-bold leading-relaxed lg:w-10 lg:h-10">
                                                 2
                                             </span>{" "}
                                             Company Admin Information
@@ -306,9 +313,10 @@ function Register() {
                                                 setRole(newRole);
                                             }}
                                         >
-                                            <option value="" disabled selected>choose your role</option>
+                                            <option value="" disabled>choose your role</option>
                                             <option value="HR">HR</option>
-                                            <option value="CEO">CEO</option>
+                                            <option value="employee">HR</option>
+
                                         </select>
                                     </div>
                                 </div>
@@ -321,7 +329,7 @@ function Register() {
                                 </button>
                                     <button
                                         type="submit"
-                                        className="w-full my-4 px-6 py-3 bg-green-600 text-white rounded-xl"
+                                        className="w-full my-4 px-6 py-3 bg-gray-900 text-white rounded-xl"
                                     >
                                         continue
                                     </button>
@@ -344,7 +352,7 @@ function Register() {
                                     {/* Step 3 */}
                                     <li className="flex relative text-center text-indigo-600 text-base font-semibold leading-relaxed">
                                         <div className="sm:w-[176px] w-auto sm:whitespace-nowrap text-center z-10">
-                                            <span className="w-10 h-10 bg-green-600 border border-dotted border-green-600 rounded-full flex justify-center items-center mx-auto mb-1 text-base text-white font-bold leading-relaxed lg:w-10 lg:h-10">
+                                            <span className="w-10 h-10 bg-gray-900 border border-dotted border-green-600 rounded-full flex justify-center items-center mx-auto mb-1 text-base text-white font-bold leading-relaxed lg:w-10 lg:h-10">
                                                 3
                                             </span>{" "}
                                             Confirm account
@@ -391,7 +399,7 @@ function Register() {
                                         />
                                     </div>
                                 </div>
-                                {passwordError}
+                                <h1 className="text-red-500 my-5">{passwordError} </h1>
                                 {/* Submit Button */}
                                 <div className="w-full flex justify-end">
                                 <button type="button" onClick={handleBack}
@@ -401,7 +409,7 @@ function Register() {
                                 </button>
                                     <button
                                         type="submit"
-                                        className="w-full my-4 px-6 py-3 bg-green-600 text-white rounded-xl"
+                                        className="w-full my-4 px-6 py-3 bg-gray-900 text-white rounded-xl"
                                     >
                                         confirm
                                     </button>
