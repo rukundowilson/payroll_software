@@ -286,15 +286,14 @@ function Register() {
                                         />
                                     </div>
                                     <div className="w-full flex-col justify-start items-start gap-1.5 flex">
-                                        <label htmlFor="phone-number" className="text-gray-600 text-base font-medium leading-relaxed">
+                                        <label htmlFor="comp-email" className="text-gray-600 text-base font-medium leading-relaxed">
                                             your emaiL
                                         </label>
                                         <input
                                             type="email"
-                                            id="phone-number"
+                                            id="comp-email"
                                             className="w-full px-5 py-3 border rounded-lg"
                                             placeholder="Company Email"
-
                                             onChange={(event)=>{
                                                 const userEmail = event.target.value;
                                                 setCompanyUserEmail(userEmail)
@@ -315,8 +314,7 @@ function Register() {
                                         >
                                             <option value="" disabled>choose your role</option>
                                             <option value="HR">HR</option>
-                                            <option value="employee">HR</option>
-
+                                            <option value="employee">employee</option>
                                         </select>
                                     </div>
                                 </div>

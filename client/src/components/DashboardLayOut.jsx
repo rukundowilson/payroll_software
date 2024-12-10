@@ -18,16 +18,14 @@ const navigation = [
 const userNavigation = [
   { name: 'Your Profile', href: '#' },
   { name: 'Settings', href: '#' },
-  { name: 'Sign out', href: '#' },
+  { name: 'Sign out', href: '/logout' },
 ]
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 axios
-  .get("http://localhost:8080/isloggedin/api", {
-    withCredentials: true
-  })
+  .get('http://localhost:8080/isloggedin', { withCredentials:true })
   .then((response) => {
     console.log("Response:", response.data);
   })
@@ -43,7 +41,6 @@ axios
 export default function DashboardNavbar() {
   return (
     <>
-      
       <div className="min-h-full">
         <Disclosure as="nav" className="bg-gray-800">
           <div className="mx-auto  px-4 sm:px-6 lg:px-8">
