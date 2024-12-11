@@ -1,5 +1,5 @@
-const express = require('express');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
 const mysql = require("mysql2");
 const bcrypt = require("bcrypt");
 const session = require("express-session");
@@ -8,7 +8,7 @@ const MySQLStore = require("express-mysql-session")(session);
 const app = express();
 const PORT = 8080;
 
-// Create database connection
+// Database connection
 const db = mysql.createConnection({
   user: "root",
   host: "localhost",
@@ -16,16 +16,29 @@ const db = mysql.createConnection({
   database: "payroll",
 });
 
-// MySQL session store options
-const sessionStore = new MySQLStore({
-  host: 'localhost',
-  port: 3306,
-  user: 'root',
-  password: '468161Ro@',
-  database: 'payroll'
-});
+// Session store using MySQL
+const sessionStore = new MySQLStore({}, db);
 
-// Middleware for CORS
+// Middleware to parse JSON
+app.use(express.json());
+
+// Configure session
+app.use(
+  session({
+    key: "user_session",
+    secret: "session_cookie_secret",
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: false, // Set to true only with HTTPS
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+    },
+  })
+);
+
+// CORS configuration
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -33,33 +46,17 @@ app.use(
     credentials: true,
   })
 );
-
-// Middleware to parse JSON
-app.use(express.json());
-
-// Configure sessions
-app.use(session({
-  key: 'user_session',
-  secret: 'session_cookie_secret',
-  store: sessionStore,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: false, 
-    maxAge: 1000 * 60 * 60 * 24
+// auth middleware
+const requireAuth = (req, res, next) => {
+  if (!req.session.user) {
+    return res.status(401).json({ message: "Unauthorized" });
   }
-}));
-
-sessionStore.onReady().then(() => {
-  console.log('Session store is ready.');
-}).catch((error) => {
-  console.error('Error initializing session store:', error);
-});
+  next();
+};
 
 // Home route
-app.get('/', (req, res) => {
-  res.status(200).json({ message: 'Welcome to the Payroll Backend!' });
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Welcome to the Payroll Backend!" });
 });
 
 // Login route
@@ -109,7 +106,7 @@ app.post("/login", (req, res) => {
       return res.status(200).json({
         message: "Login successful.",
         redirectPath: "/company/user/payroll/management-panel",
-        user: req.session.user,
+        user: session.user,
       });
     } catch (error) {
       console.error("Password comparison error:", error);
@@ -122,7 +119,8 @@ app.post("/login", (req, res) => {
 app.post("/payroll/new/user", (req, res) => {
   const { aboutCompany, aboutCompanyAdmin } = req.body;
   const { compName, compEmail, country, currency } = aboutCompany;
-  const { userName, role, phoneNumber, userEmail, password, confirmPassword } = aboutCompanyAdmin;
+  const { userName, role, phoneNumber, userEmail, password, confirmPassword } =
+    aboutCompanyAdmin;
 
   if (password !== confirmPassword) {
     return res.status(400).json({ message: "Passwords do not match!" });
@@ -140,7 +138,7 @@ app.post("/payroll/new/user", (req, res) => {
     VALUES (?, ?, ?, ?, ?);
   `;
 
-  db.query(insertUserQuery, [userName, hashedPassword, role, userEmail, 'Active'], (err, userResult) => {
+  db.query(insertUserQuery, [userName, hashedPassword, role, userEmail, "Active"], (err, userResult) => {
     if (err) {
       console.error("Error inserting user:", err);
       return res.status(500).json({ message: "Database error while creating user." });
@@ -174,29 +172,31 @@ app.post("/payroll/new/user", (req, res) => {
 
 // Check if the user is logged in
 app.get("/isloggedin", (req, res) => {
-  if (req.session.isAuth) {
-    console.log("logged in");
-    console.log("Session data on /isloggedin:", req.session);
+  if (req.session.isAuth && req.session.user) {
+    console.log("Session data on /isloggedin:", req.session.user);
+    console.log("is logged in")
     return res.status(200).json({
       loggedIn: true,
-      user: req.session.user,
+      user: req.session,
     });
   }
-  console.log("not logged in");
+  console.log("not logged in")
   return res.status(200).json({ loggedIn: false });
 });
 
-// Logout route
-app.post("/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.error("Error destroying session:", err);
-      return res.status(500).json({ message: "Failed to log out." });
-    }
-    res.clearCookie("user_session");
-    return res.status(200).json({ message: "Logout successful." });
-  });
+app.post('/logout', (req, res) => {
+  if (session) {
+    req.session.isAuth = false;
+    req.session.user = null;
+
+    res.clearCookie('sessionID');
+    res.status(200).send('Logged out successfully');
+  } else {
+    res.status(400).send('No session found');
+  }
 });
+
+
 
 // Start the server
 app.listen(PORT, () => {

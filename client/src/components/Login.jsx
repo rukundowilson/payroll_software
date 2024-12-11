@@ -1,40 +1,53 @@
-import {useState} from 'react';
+import { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
+
 export default function Login() {
-  const navigate = useNavigate()
-  const [credentials, setCredentials] = useState({ email: '', password: '' });
-  const [passwordError,setPasswordError] = useState("");
+  const navigate = useNavigate();
+  const [credentials, setCredentials] = useState({ 
+    email: '', 
+    password: '' 
+  });
+  const [error, setError] = useState("");
+
+  const axiosInstance = axios.create({
+    baseURL: 'http://localhost:8080',
+    withCredentials: true,
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setCredentials((prev) => ({ ...prev, [name]: value }));
+    setCredentials(prev => ({ ...prev, [name]: value }));
   };
-  console.log(credentials)
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Submitted credentials:", credentials);
-    axios.post('http://localhost:8080/login',credentials,
-      {
-        headers : {
-          'Content-type': "application/json"
-        }
+    setError("");
+
+    try {
+      const response = await axiosInstance.post('/login', credentials);      
+      const { message, redirectPath, user } = response.data;
+
+      localStorage.setItem('user', JSON.stringify(user));
+
+      // Navigate to redirect path
+      navigate(redirectPath || '/dashboard');
+      console.log(message,'got it? ')
+
+    } catch (error) {
+      if (error.response) {
+        setError(error.response.data.message || "Login failed");
+      } else if (error.request) {
+        setError("No response from server. Please check your connection.");
+      } else {
+        setError("An unexpected error occurred");
       }
-    )
-    .then((res)=>{
-      console.log(res.data)
-      const {message,redirectPath} = res.data;
-      navigate(redirectPath)
-      console.log(message)
-      if (message){
-        setPasswordError(message);
-      }
-    })
-    .catch((err)=>{
-      console.log(err);
-      alert("error while sending credentials to the backend");
-    })
+      
+      console.error("Login error:", error);
+    }
   };
 
   return (
@@ -42,21 +55,29 @@ export default function Login() {
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <img
           alt="softcloud logo"
-          src=""
+          src="/path-to-your-logo"
           className="mx-auto h-10 w-auto"
         />
         <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
           Sign in to your account
         </h2>
       </div>
-      <div className='sm:mx-auto sm:w-full sm:max-w-sm sm:my-4 text-center bg-red-600' >
-        <span className='text-white block mt-2'>{passwordError}</span>
-      </div>
+
+      {/* Error Message Banner */}
+      {error && (
+        <div className='sm:mx-auto sm:w-full sm:max-w-sm my-4 text-center bg-red-600'>
+          <span className='text-white block py-2'>{error}</span>
+        </div>
+      )}
+
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Email Input */}
           <div>
-            <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
+            <label 
+              htmlFor="email" 
+              className="block text-sm/6 font-medium text-gray-900"
+            >
               Your company email address
             </label>
             <div className="mt-2">
@@ -76,11 +97,17 @@ export default function Login() {
           {/* Password Input */}
           <div>
             <div className="flex items-center justify-between">
-              <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">
+              <label 
+                htmlFor="password" 
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 Password
               </label>
               <div className="text-sm">
-                <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                <a 
+                  href="/forgot-password" 
+                  className="font-semibold text-indigo-600 hover:text-indigo-500"
+                >
                   Forgot password?
                 </a>
               </div>
@@ -112,7 +139,10 @@ export default function Login() {
 
         <p className="mt-10 text-center text-sm/6 text-gray-500">
           Not a member?{' '}
-          <a href="/register" className="font-semibold text-indigo-600 hover:text-indigo-500">
+          <a 
+            href="/register" 
+            className="font-semibold text-indigo-600 hover:text-indigo-500"
+          >
             register instead
           </a>
         </p>

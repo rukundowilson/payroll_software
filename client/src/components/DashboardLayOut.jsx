@@ -1,6 +1,6 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import axios from 'axios'
+import axios from 'axios';
 
 const user = {
   name: 'softcloud',
@@ -18,12 +18,13 @@ const navigation = [
 const userNavigation = [
   { name: 'Your Profile', href: '#' },
   { name: 'Settings', href: '#' },
-  { name: 'Sign out', href: '/logout' },
+  { name: 'Sign out',href: '#' },
 ]
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
+
 axios
   .get('http://localhost:8080/isloggedin', { withCredentials:true })
   .then((response) => {
@@ -36,6 +37,18 @@ axios
       console.error("Error:", error.message);
     }
   });
+
+  function handleLogout() {
+    axios
+      .post('http://localhost:8080/logout', {}, { withCredentials: true })
+      .then(() => {
+        // Redirect to login page or homepage after logout
+        window.location.href = '/login';
+      })
+      .catch((error) => {
+        console.error('Logout error:', error);
+      });
+  }
 
 
 export default function DashboardNavbar() {
@@ -77,7 +90,7 @@ export default function DashboardNavbar() {
                     <span className="sr-only">View notifications</span>
                     <BellIcon aria-hidden="true" className="size-6" />
                   </button>
-
+                  <button onClick={handleLogout} >logout</button>
                   {/* Profile dropdown */}
                   <Menu as="div" className="relative ml-3">
                     <div>
@@ -103,6 +116,8 @@ export default function DashboardNavbar() {
                       ))}
                     </MenuItems>
                   </Menu>
+                  <button className="text-white font-bold bg-gray-500" onClick={handleLogout} >logout</button>
+
                 </div>
               </div>
               <div className="-mr-2 flex md:hidden">
