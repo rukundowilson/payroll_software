@@ -45,7 +45,7 @@ function App() {
               <Register/>
             </>
           }/>
-          <Route path="/company/user/payroll/management-panel" element={
+          <Route path="/user/dashboard" element={
             <>
             <DashboardNavbar/>
             </>

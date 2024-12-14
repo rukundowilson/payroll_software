@@ -1,28 +1,31 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
-import {useNavigate} from "react-router-dom"
 
 function Register() {
 
     const [step, setStep] = useState(1); 
-
-    const [companyName, setCompanyName] = useState("");
-    const [companyEmail, setCompEmail] = useState("");
-    const [country, setCountry] = useState("");
-    const [currency, setCurrency] = useState("");
-    const [userName,setUserName] = useState("");
-    const [role,setRole] = useState("");
-    const [password, setPassWord] = useState("")
-    const [phoneNumber,setPhoneNumber] = useState("");
-    const [companyUserEmail, setCompanyUserEmail] = useState("")
-    const [confirmPassword, setConfirmPassWord] = useState("")
+    const [allTheData, setAllTheData] = useState({
+        companyName : "",
+        companyEmail : "",
+        country : "",
+        currency : "",
+        userName : "",
+        role : "",
+        password : "",
+        phoneNumber : "",
+        companyUserEmail : "",
+        confirmPassword : "",
+    });
 
     // setting up some validations
     const [userError, setError] = useState("");
     const [passwordError, setPassWordError] = useState("");
 
-    const navigate = useNavigate()
-
+    // handle user input
+    const handleUserInput = async (event)=>{
+        const { name, value } = event.target;
+        setAllTheData(prev=>({...prev,[name]: value}))
+    }
     const handleNext = () => {
         setStep((prevStep) => prevStep + 1);
       };
@@ -32,7 +35,7 @@ function Register() {
       };
 
       const validateStep1 = () => {
-            if (!companyName || !companyEmail || !country || !currency) {
+            if (!allTheData.companyName || !allTheData.companyEmail || !allTheData.country || !allTheData.currency) {
                 alert("Please fill all fields in Step 1.");
                 return false;
             }
@@ -47,8 +50,8 @@ function Register() {
     };
     
     const validateStep2 = () => {
-        if (!userName || !companyUserEmail || !role) {
-            alert("Please fill all fields in Step 1.");
+        if (!allTheData.userName || !allTheData.companyUserEmail || !allTheData.role) {
+            alert("Please fill all fields in Step 2.");
             return false;
         }
         return true;
@@ -66,22 +69,7 @@ function Register() {
         axios
             .post(
                 "http://localhost:8080/payroll/new/user",
-                { 
-                    aboutCompany : {compName: companyName, 
-                                    compEmail: companyEmail,
-                                    country: country,
-                                    currency: currency,
-                                },
-                    aboutCompanyAdmin : {
-                        userName : userName,
-                        role : role,
-                        phoneNumber : phoneNumber,
-                        companyUserEmail : companyUserEmail,
-                        password : password,
-                        confirmPassword : confirmPassword,
-
-                    }       
-                },
+                allTheData,
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -95,7 +83,7 @@ function Register() {
                 }
                 else if (response.data.message){
                     setPassWordError(response.data.message)
-                    navigate(response.data.redirectPath)
+                    window.location.href = '/login'
                 }
             })
             .catch((error) => {
@@ -104,13 +92,7 @@ function Register() {
             });
 
     }
-    useEffect(() => {
-        // Log the values when they change
-        console.log("Company Name:", companyName);
-        console.log("Company Email:", companyEmail);
-        console.log("Country:", country);
-        console.log("Currency:", currency);
-    }, [companyName, companyEmail, country, currency]); // Run whenever any of these state variables change
+    console.log(allTheData)
 
     return (
         <>
@@ -147,10 +129,11 @@ function Register() {
                                         <input
                                             type="text"
                                             id="companyName"
+                                            name="companyName"
                                             className="w-full px-5 py-3 border rounded-lg"
                                             placeholder="Company Name"
-                                            value={companyName}
-                                            onChange={(event) => setCompanyName(event.target.value)}
+                                            value={allTheData.companyName}
+                                            onChange={handleUserInput}
                                         />
                                         {userError}
                                     </div>
@@ -162,10 +145,11 @@ function Register() {
                                         <input
                                             type="email"
                                             id="companyEmail"
+                                            name="companyEmail"
                                             className="w-full px-5 py-3 border rounded-lg"
                                             placeholder="Company Email"
-                                            value={companyEmail}
-                                            onChange={(event) => setCompEmail(event.target.value)}
+                                            value={allTheData.email}
+                                            onChange={handleUserInput}
                                         />
                                     </div>
                                     {/* Country Selector */}
@@ -175,9 +159,10 @@ function Register() {
                                         </label>
                                         <select
                                             id="country"
+                                            name="country"
                                             className="w-full px-5 py-3 border rounded-lg"
-                                            value={country}
-                                            onChange={(event) => setCountry(event.target.value)}
+                                            value={allTheData.country}
+                                            onChange={handleUserInput}
                                         >
                                             <option value="" disabled>
                                                 Select a Country
@@ -196,9 +181,10 @@ function Register() {
                                         </label>
                                         <select
                                             id="currency"
+                                            name="currency"
                                             className="w-full px-5 py-3 border rounded-lg"
-                                            value={currency}
-                                            onChange={(event) => setCurrency(event.target.value)}
+                                            value={allTheData.currency}
+                                            onChange={handleUserInput}
                                         >
                                             <option value="" disabled>
                                                 Choose Currency
@@ -259,13 +245,11 @@ function Register() {
                                         <input
                                             type="text"
                                             id="userName"
+                                            name="userName"
                                             className="w-full px-5 py-3 border rounded-lg"
                                             placeholder="your name Name"
 
-                                            onChange={(event)=>{
-                                                const userHasName = event.target.value;
-                                                setUserName(userHasName)
-                                            }}
+                                            onChange={handleUserInput}
                                         />
                                     </div>
                                     {/* company user phone number Input */}
@@ -276,13 +260,11 @@ function Register() {
                                         <input
                                             type="text"
                                             id="phone-number"
+                                            name="phoneNumber"
                                             className="w-full px-5 py-3 border rounded-lg"
                                             placeholder="phone number"
 
-                                            onChange={(event)=>{
-                                                const phoneNum = event.target.value;
-                                                setPhoneNumber(phoneNum)
-                                            }}
+                                            onChange={handleUserInput}
                                         />
                                     </div>
                                     <div className="w-full flex-col justify-start items-start gap-1.5 flex">
@@ -292,12 +274,10 @@ function Register() {
                                         <input
                                             type="email"
                                             id="comp-email"
+                                            name="companyUserEmail"
                                             className="w-full px-5 py-3 border rounded-lg"
                                             placeholder="Company Email"
-                                            onChange={(event)=>{
-                                                const userEmail = event.target.value;
-                                                setCompanyUserEmail(userEmail)
-                                            }}
+                                            onChange={handleUserInput}
                                         />
                                     </div>
 
@@ -305,12 +285,9 @@ function Register() {
                                         <label htmlFor="role" className="text-gray-600 text-base font-medium leading-relaxed">
                                             role
                                         </label>
-                                        <select id="role" className="w-full px-5 py-3 border rounded-lg"
-                                            value={role}
-                                            onChange={(event)=>{
-                                                const newRole = event.target.value;
-                                                setRole(newRole);
-                                            }}
+                                        <select id="role" name="role" className="w-full px-5 py-3 border rounded-lg"
+                                            value={allTheData.value}
+                                            onChange={handleUserInput}
                                         >
                                             <option value="" disabled>choose your role</option>
                                             <option value="HR">HR</option>
@@ -372,12 +349,10 @@ function Register() {
                                         <input
                                             type="password"
                                             id="password"
+                                            name="password"
                                             className="w-full px-5 py-3 border rounded-lg"
                                             placeholder="password"
-                                            onChange={(event)=>{
-                                                const password = event.target.value;
-                                                setPassWord(password)
-                                            }}
+                                            onChange={handleUserInput}
                                         />
                                     </div>
                                     {/* company user phone number Input */}
@@ -388,12 +363,10 @@ function Register() {
                                         <input
                                             type="password"
                                             id="confirm_password"
+                                            name="confirmPassword"
                                             className="w-full px-5 py-3 border rounded-lg"
                                             placeholder="Company Email"
-                                            onChange={(event)=>{
-                                                const password = event.target.value;
-                                                setConfirmPassWord(password)
-                                            }}
+                                            onChange={handleUserInput}
                                         />
                                     </div>
                                 </div>

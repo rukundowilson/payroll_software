@@ -1,199 +1,209 @@
-import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import axios from 'axios';
-
-const user = {
-  name: 'softcloud',
-  email: 'softcloud.saas@gmail.com',
-  imageUrl:
-    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-}
-const navigation = [
-  { name: 'Dashboard', href: '#', current: true },
-  { name: 'new-employee', href: '#', current: false },
-  { name: 'Employees', href: '#', current: false },
-  { name: 'active-payments', href: '#', current: false },
-  { name: 'canceled-payments', href: '#', current: false },
-]
-const userNavigation = [
-  { name: 'Your Profile', href: '#' },
-  { name: 'Settings', href: '#' },
-  { name: 'Sign out',href: '#' },
-]
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
-}
-
-axios
-  .get('http://localhost:8080/isloggedin', { withCredentials:true })
-  .then((response) => {
-    console.log("Response:", response.data);
-  })
-  .catch((error) => {
-    if (error.response) {
-      console.error("Error response:", error.response.data);
-    } else {
-      console.error("Error:", error.message);
-    }
-  });
-
-  function handleLogout() {
-    axios
-      .post('http://localhost:8080/logout', {}, { withCredentials: true })
-      .then(() => {
-        // Redirect to login page or homepage after logout
-        window.location.href = '/login';
-      })
-      .catch((error) => {
-        console.error('Logout error:', error);
-      });
-  }
+import React, { useState, useEffect } from 'react';
+import { Camera, Home, Users, DollarSign, Building2, UserPlus, Bell, Menu, X } from 'lucide-react';
+import DepartmentNavigation from './Departments';
+import NewEmployee from './Hire';
 
 
 export default function DashboardNavbar() {
+  const [client, setClient] = useState({
+    name: '',
+    email: '',
+    imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+  });
+  const [currentView, setCurrentView] = useState('dashboard');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Simulated authentication check
+    const checkAuthentication = () => {
+      // In a real app, this would be an actual API call
+      fetch('http://localhost:8080/isloggedin', {
+        method: 'GET',
+        credentials: 'include'
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log("Response:", data);
+        const { loggedIn, user } = data;
+        if (loggedIn) {
+          setClient(prev => ({
+            ...prev,
+            name: user.username,
+            email: user.email
+          }));
+          setIsAuthenticated(true);
+        }
+      })
+      .catch(error => {
+        console.error("Authentication error:", error);
+        setIsAuthenticated(false);
+      });
+    };
+
+    checkAuthentication();
+  }, []);
+
+  const handleLogout = () => {
+    // Simulated logout
+    fetch('http://localhost:8080/logout', {
+      method: 'POST',
+      credentials: 'include'
+    })
+    .then(() => {
+      // Redirect to login page after logout
+      window.location.href = '/login';
+    })
+    .catch((error) => {
+      console.error('Logout error:', error);
+    });
+  };
+
+  const navigation = [
+    { name: 'Dashboard', icon: Home, view: 'dashboard' },
+    { name: 'New Employee', icon: UserPlus, view: 'newEmployee' },
+    { name: 'Employees', icon: Users, view: 'employees' },
+    { name: 'Payments', icon: DollarSign, view: 'payments' },
+    { name: 'Departments', icon: Building2, view: 'departments' }
+  ];
+
+  const renderContent = () => {
+    if (!isAuthenticated) {
+      return <div className="text-center text-red-500">Please log in to access the dashboard</div>;
+    }
+
+    switch(currentView) {
+      case 'dashboard': 
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white shadow-lg rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Total Employees</h2>
+              <div className="text-4xl font-bold text-blue-600">254</div>
+            </div>
+            <div className="bg-white shadow-lg rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Active Payments</h2>
+              <div className="text-4xl font-bold text-green-600">$542,890</div>
+            </div>
+            <div className="bg-white shadow-lg rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Departments</h2>
+              <div className="text-4xl font-bold text-purple-600">8</div>
+            </div>
+          </div>
+        );
+      case 'departments': 
+        return(
+          <div className="">
+            <DepartmentNavigation/>
+          </div>
+        );
+      case 'newEmployee': 
+        return (
+          <div className="p-6 rounded-lg">
+            <NewEmployee/>
+          </div>);
+      default: 
+        return <div className="bg-white p-6 rounded-lg shadow-md">Dashboard</div>;
+    }
+  };
+
   return (
-    <>
-      <div className="min-h-full">
-        <Disclosure as="nav" className="bg-gray-800">
-          <div className="mx-auto  px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 items-center justify-between">
-              <div className="flex items-center">
-                <div className="shrink-0 color-white">
-                 <h1 className='text-white text-3xl font-bold'>softPayroll</h1>
-                </div>
-                <div className="hidden md:block">
-                  <div className="ml-10 flex items-baseline space-x-4">
-                    {navigation.map((item) => (
-                      <a
-                        key={item.name}
-                        href={item.href}
-                        aria-current={item.current ? 'page' : undefined}
-                        className={classNames(
-                          item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                          'rounded-md px-3 py-2 text-sm font-medium',
-                        )}
-                      >
-                        {item.name}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="hidden md:block">
-                <div className="ml-4 flex items-center md:ml-6">
-                  <button
-                    type="button"
-                    className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                  >
-                    <span className="absolute -inset-1.5" />
-                    <span className="sr-only">View notifications</span>
-                    <BellIcon aria-hidden="true" className="size-6" />
-                  </button>
-                  <button onClick={handleLogout} >logout</button>
-                  {/* Profile dropdown */}
-                  <Menu as="div" className="relative ml-3">
-                    <div>
-                      <MenuButton className="relative flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                        <span className="absolute -inset-1.5" />
-                        <span className="sr-only">Open user menu</span>
-                        <img alt="" src={user.imageUrl} className="size-8 rounded-full" />
-                      </MenuButton>
-                    </div>
-                    <MenuItems
-                      transition
-                      className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                    >
-                      {userNavigation.map((item) => (
-                        <MenuItem key={item.name}>
-                          <a
-                            href={item.href}
-                            className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:outline-none"
-                          >
-                            {item.name}
-                          </a>
-                        </MenuItem>
-                      ))}
-                    </MenuItems>
-                  </Menu>
-                  <button className="text-white font-bold bg-gray-500" onClick={handleLogout} >logout</button>
-
-                </div>
-              </div>
-              <div className="-mr-2 flex md:hidden">
-                {/* Mobile menu button */}
-                <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md bg-gray-800 p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                  <span className="absolute -inset-0.5" />
-                  <span className="sr-only">Open main menu</span>
-                  <Bars3Icon aria-hidden="true" className="block size-6 group-data-[open]:hidden" />
-                  <XMarkIcon aria-hidden="true" className="hidden size-6 group-data-[open]:block" />
-                </DisclosureButton>
+    <div className="min-h-screen bg-gray-100 flex">
+      {/* Navbar */}
+      <div className="fixed top-0 left-0 shadow-md right-0 bg-white h-16 flex items-center justify-between px-4">
+        <div className="flex items-center">
+          <h1 className="text-gray-900 text-2xl font-bold tracking-wider"> The Hr</h1>
+          
+          {/* Mobile Menu Toggle */}
+          <button 
+            className="ml-4 md:hidden text-gray-900"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+        
+        {isAuthenticated && (
+          <div className="hidden md:flex items-center space-x-4">
+            <button className="text-gray-900 hover:text-blue-200 mr-4">
+              <Bell size={24} />
+            </button>
+            <div className="flex items-center">
+              <img 
+                src={client.imageUrl} 
+                alt="Profile" 
+                className="h-8 w-8 rounded-full mr-2 ring-2 ring-white" 
+              />
+              <div className="text-gray-900">
+                <div className="text-sm font-semibold">{client.name}</div>
+                <div className="text-xs opacity-75">{client.email}</div>
               </div>
             </div>
           </div>
-
-          <DisclosurePanel className="md:hidden">
-            <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
-              {navigation.map((item) => (
-                <DisclosureButton
-                  key={item.name}
-                  as="a"
-                  href={item.href}
-                  aria-current={item.current ? 'page' : undefined}
-                  className={classNames(
-                    item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                    'block rounded-md px-3 py-2 text-base font-medium',
-                  )}
-                >
-                  {item.name}
-                </DisclosureButton>
-              ))}
-            </div>
-            <div className="border-t border-gray-700 pb-3 pt-4">
-              <div className="flex items-center px-5">
-                <div className="shrink-0">
-                  <img alt="" src={user.imageUrl} className="size-10 rounded-full" />
-                </div>
-                <div className="ml-3">
-                  <div className="text-base/5 font-medium text-white">{user.name}</div>
-                  <div className="text-sm font-medium text-gray-400">{user.email}</div>
-                </div>
-                <button
-                  type="button"
-                  className="relative ml-auto shrink-0 rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                >
-                  <span className="absolute -inset-1.5" />
-                  <span className="sr-only">View notifications</span>
-                  <BellIcon aria-hidden="true" className="size-6" />
-                </button>
-              </div>
-              <div className="mt-3 space-y-1 px-2">
-                {userNavigation.map((item) => (
-                  <DisclosureButton
-                    key={item.name}
-                    as="a"
-                    href={item.href}
-                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
-                  >
-                    {item.name}
-                  </DisclosureButton>
-                ))}
-              </div>
-            </div>
-          </DisclosurePanel>
-        </Disclosure>
-
-        <header className="bg-white shadow">
-          <div className="mx-auto px-4 py-6 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Dashboard</h1>
-          </div>
-        </header>
-        <main>
-          <div className="mx-auto px-4 py-6 sm:px-6 lg:px-8">
-          <h1>this is a redirect to your dashboard! just cookin something for you!</h1>
-            </div>
-        </main>
+        )}
       </div>
-    </>
-  )
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && isAuthenticated && (
+        <div className="fixed top-16 left-0 right-0 bg-white shadow-lg md:hidden z-40">
+          {navigation.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => {
+                setCurrentView(item.view);
+                setMobileMenuOpen(false);
+              }}
+              className="w-full text-left px-4 py-3 hover:bg-gray-100 flex items-center"
+            >
+              <item.icon className="mr-3 h-5 w-5" />
+              {item.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/*================ Sidebar ============== */}
+
+      {isAuthenticated && (
+        <div className="fixed top-0 z-1000 bottom-0 left-0 w-64 bg-gray-900 shadow-lg pt-6 hidden md:block">
+
+          <nav className="space-y-2 px-4">
+            <h3 className='text-white font-bold text-xl my-4'>The Office of Hr</h3>
+            <hr/>
+            <br/>
+            {navigation.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => setCurrentView(item.view)}
+                className={`
+                  w-full text-left px-4 py-3 rounded-lg transition-all duration-300 
+                  flex items-center 
+                  ${currentView === item.view 
+                    ? 'bg-gray-500 text-white' 
+                    : 'text-white hover:bg-gray-700 hover:text-blue-600'}
+                `}
+              >
+                <item.icon className="mr-3 h-6 w-6" />
+                {item.name}
+              </button>
+            ))}
+          </nav>
+          <div className="absolute bottom-0 left-0 right-0 p-4">
+            <button 
+              onClick={handleLogout}
+              className="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content */}
+      <main className="mt-16 ml-0 md:ml-64 flex-1 p-8 bg-gray-100">
+        <div className="max-w-7xl mx-auto">
+          {renderContent()}
+        </div>
+      </main>
+    </div>
+  );
 }

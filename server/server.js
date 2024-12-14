@@ -16,10 +16,8 @@ const db = mysql.createConnection({
   database: "payroll",
 });
 
-// Session store using MySQL
 const sessionStore = new MySQLStore({}, db);
 
-// Middleware to parse JSON
 app.use(express.json());
 
 // Configure session
@@ -117,11 +115,9 @@ app.post("/login", (req, res) => {
 
 // Registration route
 app.post("/payroll/new/user", (req, res) => {
-  const { aboutCompany, aboutCompanyAdmin } = req.body;
-  const { compName, compEmail, country, currency } = aboutCompany;
-  const { userName, role, phoneNumber, userEmail, password, confirmPassword } =
-    aboutCompanyAdmin;
-
+  const allTheData = req.body;
+  const { companyName, companyEmail, country, currency,userName, role,password,phoneNumber,companyUserEmail,confirmPassword} = allTheData;
+  
   if (password !== confirmPassword) {
     return res.status(400).json({ message: "Passwords do not match!" });
   }
@@ -138,7 +134,7 @@ app.post("/payroll/new/user", (req, res) => {
     VALUES (?, ?, ?, ?, ?);
   `;
 
-  db.query(insertUserQuery, [userName, hashedPassword, role, userEmail, "Active"], (err, userResult) => {
+  db.query(insertUserQuery, [userName, hashedPassword, role, companyUserEmail, "Active"], (err, userResult) => {
     if (err) {
       console.error("Error inserting user:", err);
       return res.status(500).json({ message: "Database error while creating user." });
@@ -146,25 +142,14 @@ app.post("/payroll/new/user", (req, res) => {
 
     const userId = userResult.insertId;
 
-    db.query(insertCompanyQuery, [compName, userId, compEmail, country, currency], (err) => {
+    db.query(insertCompanyQuery, [companyName, userId, companyEmail, country, currency], (err) => {
       if (err) {
         console.error("Error inserting company:", err);
         return res.status(500).json({ message: "Database error while creating company." });
       }
-
-      req.session.isAuth = true;
-      req.session.user = {
-        user_id: userId,
-        email: compEmail,
-        username: userName,
-        company_name: compName,
-      };
-
-      console.log("Session after registration:", req.session);
-
       return res.status(201).json({
         message: "Company registered successfully!",
-        redirectPath: "/company/user/payroll/management-panel",
+        redirectPath: "/login",
       });
     });
   });
@@ -177,11 +162,42 @@ app.get("/isloggedin", (req, res) => {
     console.log("is logged in")
     return res.status(200).json({
       loggedIn: true,
-      user: req.session,
+      user: req.session.user,
     });
   }
   console.log("not logged in")
   return res.status(200).json({ loggedIn: false });
+});
+
+app.post('/new/department',(req,res)=>{
+  if (!req.session || !req.session.isAuth) {
+    return res.status(401).json({ message: "Unauthorized. Please log in." });
+  }
+  const user_id = req.session.user.user_id;
+  const insertQuerry = ``
+})
+
+app.get('/departments', (req, res) => {
+  if (!req.session || !req.session.isAuth) {
+    return res.status(401).json({ message: "Unauthorized. Please log in." });
+  }
+
+  const departmentGet = `
+    SELECT department_id, department_name 
+    FROM Departments 
+    WHERE company_id = ?;
+  `;
+
+  db.query(departmentGet, [req.session.user.user_id], (error, result) => {
+    if (error) {
+      console.error("Database error:", error);
+      return res.status(500).json({ serverSideError: "Failed to fetch departments." });
+    }
+
+    // Check the result and send it back
+    console.log("Departments fetched:", result);
+    return res.status(200).json({ departments: result, numberOfDeps : result.length });
+  });
 });
 
 app.post('/logout', (req, res) => {

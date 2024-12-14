@@ -3,7 +3,6 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
-  const navigate = useNavigate();
   const [credentials, setCredentials] = useState({ 
     email: '', 
     password: '' 
@@ -32,9 +31,8 @@ export default function Login() {
       const { message, redirectPath, user } = response.data;
 
       localStorage.setItem('user', JSON.stringify(user));
-
-      // Navigate to redirect path
-      navigate(redirectPath || '/dashboard');
+      window.location.href=`/user/dashboard`
+      // navigate(redirectPath || '/dashboard');
       console.log(message,'got it? ')
 
     } catch (error) {
