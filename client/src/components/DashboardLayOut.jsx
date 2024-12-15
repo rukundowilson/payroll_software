@@ -66,6 +66,8 @@ export default function DashboardNavbar() {
     { name: 'Payments', icon: DollarSign, view: 'payments' },
     { name: 'Departments', icon: Building2, view: 'departments' }
   ];
+  
+  // get total
 
   const renderContent = () => {
     if (!isAuthenticated) {

@@ -174,7 +174,11 @@ app.post('/new/department',(req,res)=>{
     return res.status(401).json({ message: "Unauthorized. Please log in." });
   }
   const user_id = req.session.user.user_id;
-  const insertQuerry = ``
+  const userDepartment = req.body;
+  const {name} = userDepartment;
+  console.log(name,user_id);
+  const insertQuery = `INSERT INTO Departments(company_id,department_name) VALUES(?,?);`;
+  db.query(insertQuery,[user_id,name]);
 })
 
 app.get('/departments', (req, res) => {

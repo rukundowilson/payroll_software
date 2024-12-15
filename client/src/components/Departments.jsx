@@ -42,7 +42,6 @@ const DepartmentNavigation = () => {
       console.error("Error fetching departments:", error);
     }
   };
-  
 
   const handleAddDepartment = async () => {
     if (!newDepartment.trim()) {
@@ -72,16 +71,15 @@ const DepartmentNavigation = () => {
     }
   };
 
-  useEffect(() => {
-    getAllDepartment();
-  }, [open,!open]);
-
   const handleCloseAdd = ()=>{
     handleAddDepartment();
     setOpen(false);
     setNewDepartment("");
   }
-  
+
+  useEffect(() => {
+    getAllDepartment();
+  }, [newDepartment]);  
 
 
   return (
