@@ -1,7 +1,29 @@
 import { PhotoIcon, UserCircleIcon } from '@heroicons/react/24/solid'
 import { ChevronDownIcon } from '@heroicons/react/16/solid'
+import { useEffect, useState } from 'react';
 
 export default function NewEmployee() {
+
+  const [allDepartments,setAllDepartment] = useState([])
+
+  // gonna send async request to get all departments
+  const getDepartments = async()=>{
+    const response = await fetch('http://localhost:8080/departments',{
+      method : "GET",
+      credentials : 'include'
+    })
+    if (!response.ok){
+      console.error("error during department getbfrom newEmployee component",response.status);
+    }
+    const dataResponse = await response.json();
+    setAllDepartment(dataResponse.departments);
+    return (dataResponse);
+  }
+  useEffect(()=>{
+    getDepartments();
+  },[]);
+  console.log("department got from newEmployee component",allDepartments);
+
   return (
     <form>
       <div className="space-y-12 bg-white shadow-lg container mx-auto w-md max-w-2xl px-4 py-8" >
@@ -49,7 +71,7 @@ export default function NewEmployee() {
 
             <div className="sm:col-span-3">
               <label htmlFor="country" className="block text-sm/6 font-medium text-gray-900">
-                
+                revel of education
               </label>
               <div className="mt-2 grid grid-cols-1">
                 <select
@@ -58,10 +80,9 @@ export default function NewEmployee() {
                   autoComplete="contractType"
                   className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 >
-                  <option value="" selected disabled>choose department</option>
-                  <option value="">dep 1</option>
-                  <option value="">dep 2</option>
-                  <option value="">dep 3</option>
+                  <option value="" selected disabled>choose degree</option>                  
+                  <option value="">masters</option>
+                  <option value="">doctor</option>
                 </select>
                 <ChevronDownIcon
                   aria-hidden="true"
@@ -153,9 +174,11 @@ export default function NewEmployee() {
                   className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 >
                   <option value="" selected disabled>choose department</option>
-                  <option value="">dep 1</option>
-                  <option value="">dep 2</option>
-                  <option value="">dep 3</option>
+                  {allDepartments.map(department => (
+                    <option key={department.department_id} value={department.department_name}>
+                      {department.department_name}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDownIcon
                   aria-hidden="true"

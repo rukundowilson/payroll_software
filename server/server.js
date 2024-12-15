@@ -54,7 +54,7 @@ const requireAuth = (req, res, next) => {
 
 // Home route
 app.get("/", (req, res) => {
-  res.status(200).json({ message: "Welcome to the Payroll Backend!" });
+  return res.status(200).json({message: "Welcome to the Payroll Backend!" });
 });
 
 // Login route
@@ -176,6 +176,7 @@ app.post('/new/department',(req,res)=>{
   const user_id = req.session.user.user_id;
   const userDepartment = req.body;
   const {name} = userDepartment;
+  console.log('got length in session: ',req.session.user.numberOfDeps)
   console.log(name,user_id);
   const insertQuery = `INSERT INTO Departments(company_id,department_name) VALUES(?,?);`;
   db.query(insertQuery,[user_id,name]);
@@ -185,7 +186,6 @@ app.get('/departments', (req, res) => {
   if (!req.session || !req.session.isAuth) {
     return res.status(401).json({ message: "Unauthorized. Please log in." });
   }
-
   const departmentGet = `
     SELECT department_id, department_name 
     FROM Departments 
@@ -200,9 +200,11 @@ app.get('/departments', (req, res) => {
 
     // Check the result and send it back
     console.log("Departments fetched:", result);
+    req.session.user.numberOfDeps = result.length;
     return res.status(200).json({ departments: result, numberOfDeps : result.length });
   });
 });
+
 
 app.post('/logout', (req, res) => {
   if (session) {

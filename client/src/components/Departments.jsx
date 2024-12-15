@@ -75,12 +75,12 @@ const DepartmentNavigation = () => {
     handleAddDepartment();
     setOpen(false);
     setNewDepartment("");
+    getAllDepartment();
   }
 
   useEffect(() => {
     getAllDepartment();
-  }, [newDepartment]);  
-
+  }, [newDepartment,open,!open]);  
 
   return (
     <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-md p-6 space-y-6">

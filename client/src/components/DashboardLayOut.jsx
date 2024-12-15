@@ -13,6 +13,7 @@ export default function DashboardNavbar() {
   const [currentView, setCurrentView] = useState('dashboard');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [numberOfDeps,setnumberOfDeps] = useState(0)
 
   useEffect(() => {
     // Simulated authentication check
@@ -40,10 +41,10 @@ export default function DashboardNavbar() {
         setIsAuthenticated(false);
       });
     };
-
     checkAuthentication();
   }, []);
 
+  
   const handleLogout = () => {
     // Simulated logout
     fetch('http://localhost:8080/logout', {
@@ -67,7 +68,6 @@ export default function DashboardNavbar() {
     { name: 'Departments', icon: Building2, view: 'departments' }
   ];
   
-  // get total
 
   const renderContent = () => {
     if (!isAuthenticated) {
@@ -88,7 +88,7 @@ export default function DashboardNavbar() {
             </div>
             <div className="bg-white shadow-lg rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-4">Departments</h2>
-              <div className="text-4xl font-bold text-purple-600">8</div>
+              <div className="text-4xl font-bold text-purple-600">{numberOfDeps}</div>
             </div>
           </div>
         );
@@ -108,6 +108,32 @@ export default function DashboardNavbar() {
     }
   };
 
+  useEffect(()=>{
+    const numberDepartments = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/departments', {
+          method: 'GET',
+          credentials: 'include',
+        });
+    
+        if (!response.ok) {
+          console.error(`Server responded with status: ${response.status}`);
+          return;
+        }
+    
+        const data = await response.json();
+        console.log("Server Response:", data);
+        setnumberOfDeps(data.numberOfDeps)
+        return data;
+      } catch (error) {
+        console.error('Error fetching number of departments:', error);
+        throw error;
+      }
+    };
+    numberDepartments();
+    
+  },[renderContent])
+  
   return (
     <div className="min-h-screen bg-gray-100 flex">
       {/* Navbar */}
