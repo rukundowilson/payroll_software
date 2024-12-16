@@ -205,6 +205,57 @@ app.get('/departments', (req, res) => {
   });
 });
 
+app.post('/new/department', async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    // Validate input
+    if (!name || name.trim() === '') {
+      return res.status(400).json({ 
+        error: 'Department name is required' 
+      });
+    }
+
+    // Check if department already exists (optional)
+    const existingDepartment = await Department.findOne({ 
+      where: { department_name: name.trim() } 
+    });
+
+    if (existingDepartment) {
+      return res.status(409).json({ 
+        error: 'Department already exists' 
+      });
+    }
+
+    // Create new department
+    const newDepartment = await Department.create({
+      department_name: name.trim()
+    });
+
+    // Respond with the newly created department
+    res.status(201).json({ 
+      newDepartment: {
+        department_id: newDepartment.id,
+        department_name: newDepartment.department_name
+      }
+    });
+
+  } catch (error) {
+    console.error('Error creating department:', error);
+    res.status(500).json({ 
+      error: 'Failed to create department' 
+    });
+  }
+});
+app.get("/employee",(req,res)=>{
+  const contractType = ["Permanent","Contract","Intern","Temporary"];
+  const educationRevel = ["bachelors","masters","professor","high school"];
+
+  res.status(200).json({
+    contractType : contractType,
+    educationRevel : educationRevel
+  })
+})
 
 app.post('/logout', (req, res) => {
   if (session) {

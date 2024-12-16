@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 export default function NewEmployee() {
 
   const [allDepartments,setAllDepartment] = useState([])
+  const [contracts,setContracts] = useState([]);
+  const [educationRevel,setEducationRevel] = useState([])
 
   // gonna send async request to get all departments
   const getDepartments = async()=>{
@@ -19,11 +21,30 @@ export default function NewEmployee() {
     setAllDepartment(dataResponse.departments);
     return (dataResponse);
   }
+  const getContracts = async ()=>{
+    try{
+      const response =await fetch('http://localhost:8080/employee',{
+        method: 'GET',
+        credentials: 'include'
+      }) 
+      if (!response.ok){
+        console.error("ellow during type of contract get!",response.status)
+      }
+      const employeeSettings = await response.json();
+      setContracts(employeeSettings.contractType)
+      setEducationRevel(employeeSettings.educationRevel)
+      console.log(employeeSettings.educationRevel)
+    }
+    catch(error){
+      console.log("error while getting contracts from backend",error)
+    }
+
+  }
+  console.log("----------",contracts);
   useEffect(()=>{
     getDepartments();
+    getContracts();
   },[]);
-  console.log("department got from newEmployee component",allDepartments);
-
   return (
     <form>
       <div className="space-y-12 bg-white shadow-lg container mx-auto w-md max-w-2xl px-4 py-8" >
@@ -80,9 +101,10 @@ export default function NewEmployee() {
                   autoComplete="contractType"
                   className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 >
-                  <option value="" selected disabled>choose degree</option>                  
-                  <option value="">masters</option>
-                  <option value="">doctor</option>
+                  <option key="ignored" selected disabled>choose degree</option>                  
+                  {educationRevel.map(revel=>(
+                    <option key={revel} value={revel}>{revel}</option>
+                  ))}
                 </select>
                 <ChevronDownIcon
                   aria-hidden="true"
@@ -126,7 +148,7 @@ export default function NewEmployee() {
 
             <div className="sm:col-span-2">
               <label htmlFor="region" className="block text-sm/6 font-medium text-gray-900">
-                State / Province
+                State /country
               </label>
               <div className="mt-2">
                 <input
@@ -143,7 +165,7 @@ export default function NewEmployee() {
         </div>
 
         <div className="border-b border-gray-900/10 pb-12">
-          <h2 className="text-base/7 font-semibold text-gray-900">Contract Information</h2>
+          <h2 className="text-base/7 font-semibold text-gray-900">Job Information</h2>
           <p className="mt-1 text-sm/6 text-gray-600">Setting contract information is essential to manage employee.</p>
 
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
@@ -198,9 +220,10 @@ export default function NewEmployee() {
                   autoComplete="contractType"
                   className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pl-3 pr-8 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 >
-                  <option value="Permanent">Permanent</option>
-                  <option value="Contract">Contract</option>
-                  <option value="Intern">Intern</option>
+                  <option selected disabled>choose contract type</option>
+                  {contracts.map(contractItem=>(
+                      <option value={contractItem} key={contractItem}>{contractItem}</option>
+                  ))}
                 </select>
                 <ChevronDownIcon
                   aria-hidden="true"
@@ -229,7 +252,7 @@ export default function NewEmployee() {
         </div>
 
         <div className="border-b border-gray-900/10 pb-12">
-          <h2 className="text-base/7 font-semibold text-gray-900">out of contract</h2>
+          <h2 className="text-base/7 font-semibold text-gray-900">other benifits or deductions</h2>
           <p className="mt-1 text-sm/6 text-gray-600">
             this is all  about setting extra benifits or deductions for a new employee if selected it will be applied.
           </p>
